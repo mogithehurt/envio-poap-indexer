@@ -1,0 +1,37 @@
+name: envio-poap-indexer # Name of the project
+description: Envio POAP Indexer # Description of the project
+networks: # Configuration of the blockchain networks that the project is deployed on
+  - id: 1 # Chain identifier of the network
+    start_block: 7844214 # Initial block from which the indexer will start listening for events
+    contracts: # Configuration for each contract
+      - name: Mainnetpoap # User-defined contract name
+        address: "0x22C1f6050E56d2876009903609a2cC3fEf83B415" # An array of addresses that the contract is deployed to on the network
+        handler: src/EventHandlers.ts # Location of the file that handles the events emitted by this contract
+        events: # Configuration for each event emitted by this contract that the indexer will listen for
+          - event: "EventToken(uint256 eventId, uint256 tokenId)" #  Name of the event (must match the name in the ABI)
+            requiredEntities: # An array of entities that need to loaded and made accessible within the handler function (an empty array indicates that no entities are required)
+              - name: "Token" # The name of the required entity (must match an entity defined in `schema.graphql`)
+              - name: "Event"
+          - event: "Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
+            requiredEntities: 
+              - name: "Token" 
+              - name: "Event"
+              - name: "Transfer"
+              - name: "Account"     
+  - id: 100 
+    start_block: 12188423 
+    contracts: 
+      - name: Gnosispoap 
+        address: "0x22C1f6050E56d2876009903609a2cC3fEf83B415" 
+        handler: src/EventHandlers.ts 
+        events: 
+          - event: "EventToken(uint256 indexed eventId, uint256 tokenId)" 
+            requiredEntities: 
+              - name: "Token" 
+              - name: "Event"
+          - event: "Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
+            requiredEntities: 
+              - name: "Token" 
+              - name: "Event"
+              - name: "Transfer"
+              - name: "Account"                   
