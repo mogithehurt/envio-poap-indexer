@@ -1,4 +1,4 @@
-## Steps to run the indexer
+# Steps to run the indexer
 
 1. Clone the repo
 1. Install any other pre-requisite packages for Envio listed [here](https://docs.envio.dev/docs/installation#prerequisites)
