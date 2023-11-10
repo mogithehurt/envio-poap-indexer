@@ -21,9 +21,7 @@ const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 MainnetpoapContract_EventToken_loader(({ event, context }) => {
   // loading the required entity
   context.Event.load(event.params.eventId.toString());
-  context.Token.load(event.params.tokenId.toString(), {
-    loaders: { loadEvent: true }
-  });
+  context.Token.load(event.params.tokenId.toString(), {});
 });
 
 MainnetpoapContract_EventToken_handler(({ event, context }) => {
@@ -62,7 +60,7 @@ MainnetpoapContract_Transfer_loader(({ event, context }) => {
   context.Account.load(event.params.from.toString());
   context.Account.load(event.params.to.toString());
   context.Token.load(event.params.tokenId.toString(), {
-    loaders: { loadEvent: true, loadOwner: true }
+    loaders: { loadEvent: true }
   });
 });
 
@@ -71,31 +69,30 @@ MainnetpoapContract_Transfer_handler(({ event, context }) => {
   let to = context.Account.get(event.params.to.toString());
   let token = context.Token.get(event.params.tokenId.toString());
 
+  if (event.params.from.toString() !== ZERO_ADDRESS) {
+    
+    if (!from) {
+      from = {
+        id: event.params.from.toString(),
+        tokensOwned: 1n  
+      };
+    }
 
-  if (!from) {
-    from = {
-      id: event.params.from.toString(),
-      // The from account at least has to own one token
-      tokensOwned: 1n
-    };
-    context.Account.set(from);
-  }
-  // Don't subtracts from the ZERO_ADDRESS (it's the one that mint the token)
-  // Avoid negative values
-  if (from.id != ZERO_ADDRESS) {
     from = {
       ...from,
       tokensOwned: from.tokensOwned - 1n
     };
+    
     context.Account.set(from);
   }
+
   if (!to) {
     to = {
       id: event.params.to.toString(),
-      tokensOwned: 0n
+      tokensOwned: 1n
     };
     context.Account.set(to);
-  } else {
+  } else if (event.params.to.toString() !== ZERO_ADDRESS) {
     to = {
       ...to,
       tokensOwned: to.tokensOwned + 1n
@@ -121,7 +118,7 @@ MainnetpoapContract_Transfer_handler(({ event, context }) => {
     context.Token.set(token);
   }
 
-  if (token.event != null) {
+  if (token.event !== null) {
     let event_ = context.Token.getEvent(token);
 
     if (event_ != null) {
@@ -133,7 +130,7 @@ MainnetpoapContract_Transfer_handler(({ event, context }) => {
       context.Event.set(event_);
 
       // Burning the token
-      if (to.id == ZERO_ADDRESS) {
+      if (to.id === ZERO_ADDRESS) {
         event_ = {
           ...event_,
           tokenCount: event_.tokenCount - 1n,
@@ -162,9 +159,7 @@ MainnetpoapContract_Transfer_handler(({ event, context }) => {
 GnosispoapContract_EventToken_loader(({ event, context }) => {
   // loading the required entity
   context.Event.load(event.params.eventId.toString());
-  context.Token.load(event.params.tokenId.toString(), {
-    loaders: { loadEvent: true }
-  });
+  context.Token.load(event.params.tokenId.toString(), {});
 });
 
 GnosispoapContract_EventToken_handler(({ event, context }) => {
@@ -203,7 +198,7 @@ GnosispoapContract_Transfer_loader(({ event, context }) => {
   context.Account.load(event.params.from.toString());
   context.Account.load(event.params.to.toString());
   context.Token.load(event.params.tokenId.toString(), {
-    loaders: { loadEvent: true, loadOwner: true }
+    loaders: { loadEvent: true }
   });
 });
 
@@ -211,32 +206,30 @@ GnosispoapContract_Transfer_handler(({ event, context }) => {
   let from = context.Account.get(event.params.from.toString());
   let to = context.Account.get(event.params.to.toString());
   let token = context.Token.get(event.params.tokenId.toString());
-  // let event_ = context.Token.getEvent(token);
 
-  if (!from) {
-    from = {
-      id: event.params.from.toString(),
-      // The from account at least has to own one token
-      tokensOwned: 1n
-    };
-    context.Account.set(from);
-  }
-  // Don't subtracts from the ZERO_ADDRESS (it's the one that mint the token)
-  // Avoid negative values
-  if (from.id != ZERO_ADDRESS) {
+  if (event.params.from.toString() !== ZERO_ADDRESS) {
+    
+    if (!from) {
+      from = {
+        id: event.params.from.toString(),
+        tokensOwned: 1n  
+      };
+    }
+
     from = {
       ...from,
       tokensOwned: from.tokensOwned - 1n
     };
+    
     context.Account.set(from);
   }
   if (!to) {
     to = {
       id: event.params.to.toString(),
-      tokensOwned: 0n
+      tokensOwned: 1n
     };
     context.Account.set(to);
-  } else {
+  } else if (event.params.to.toString() !== ZERO_ADDRESS)  {
     to = {
       ...to,
       tokensOwned: to.tokensOwned + 1n
@@ -262,7 +255,7 @@ GnosispoapContract_Transfer_handler(({ event, context }) => {
     context.Token.set(token);
   }
 
-  if (token.event != null) {
+  if (token.event !== null) {
     let event_ = context.Token.getEvent(token);
 
     if (event_ != null) {
@@ -274,7 +267,7 @@ GnosispoapContract_Transfer_handler(({ event, context }) => {
       context.Event.set(event_);
 
       // Burning the token
-      if (to.id == ZERO_ADDRESS) {
+      if (to.id === ZERO_ADDRESS) {
         event_ = {
           ...event_,
           tokenCount: event_.tokenCount - 1n,
